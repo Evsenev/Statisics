@@ -37,22 +37,31 @@ namespace Statistics
 		}
 	}
 
-	enum AlignType { Left, Right, center }
+	enum AlignType { 
+        Left, 
+        Right, 
+        Center 
+    }
 
-	struct TableCell
-	{
-		string data;
-		AlignType alignType;
-	}
+    struct TableCell
+    {
+        string data;
+        AlignType alignType;
+        public TableCell(string theData, AlignType theAlignType)
+        {
+            data = theData;
+            alignType = theAlignType;
+        }
+    }
 
 	struct TableRaw
 	{
-		TableCell[] cells;
+		public TableCell[] cells;
 	}
 
 	class TableWriter 
 	{
-		TableRaw[] rows;
+		public TableRaw[] rows;
 
 		public void WriteToFile(string filename)
 		{
@@ -89,8 +98,31 @@ namespace Statistics
 
 			TableWriter tab1 = new TableWriter();
 
-			// ... implement here
+			tab1.rows = new TableRaw[4];
+            tab1.rows[0].cells = new TableCell[]{
+	            new TableCell("", AlignType.Center),
+	            new TableCell("debit", AlignType.Center),
+	            new TableCell("credit", AlignType.Center)
+            };
 
+            tab1.rows[1].cells = new TableCell[3]{
+	            new TableCell("min", AlignType.Left),
+	            new TableCell(debit.min.ToString(), AlignType.Right),
+	            new TableCell(credit.min.ToString(), AlignType.Right)
+            };
+
+            tab1.rows[2].cells = new TableCell[3]{
+	            new TableCell("max", AlignType.Left),
+	            new TableCell(debit.max.ToString(), AlignType.Right),
+	            new TableCell(credit.max.ToString(), AlignType.Right)
+            };
+
+            tab1.rows[3].cells = new TableCell[3]{
+	            new TableCell("avg", AlignType.Left),
+	            new TableCell(debit.avg.ToString(), AlignType.Right),
+	            new TableCell(credit.avg.ToString(), AlignType.Right)
+            };
+            
 			tab1.WriteToFile("stat.txt");
 
 
