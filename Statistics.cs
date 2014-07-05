@@ -10,6 +10,7 @@ namespace Statistics
 		public int max;
 		public int min;
 		public int avg;
+		public int ssum;
 
 		public FinancialArray(int days_count)
 		{
@@ -20,7 +21,6 @@ namespace Statistics
 		{
 			max = data[0];
 			min = data[0];
-			int sum = data[0];
 			for (int i = 1; i < data.Length; i++)
 			{
 				if(min > data[i])
@@ -31,9 +31,10 @@ namespace Statistics
 				{
 					max = data[i];
 				}
-				sum += data[i];
+				ssum += data[i];
 			}
-			avg = sum / data.Length;
+			avg = ssum / data.Length;
+			ssum += data [0];
 		}
 	}
 
@@ -66,6 +67,10 @@ namespace Statistics
 		public void WriteToFile(string filename)
 		{
 			StreamWriter outFile = File.CreateText(filename);
+
+
+
+
 
 			// ... implement here
 
@@ -122,13 +127,40 @@ namespace Statistics
 	            new TableCell(debit.avg.ToString(), AlignType.Right),
 	            new TableCell(credit.avg.ToString(), AlignType.Right)
             };
-            
+
+
 			tab1.WriteToFile("stat.txt");
+
+
 
 
 			TableWriter tab2 = new TableWriter();
 
-			// ... implement here
+			tab2.rows = new TableRaw[9];
+			tab2.rows[0].cells = new TableCell[4]{
+				new TableCell("day", AlignType.Center),
+				new TableCell("debit", AlignType.Center),
+				new TableCell("credit", AlignType.Center),
+				new TableCell("cur balance", AlignType.Center)
+			};
+
+			for (int i = 1; i < (days_count+1); i++) {
+				tab2.rows [i+1].cells = new TableCell[4] {
+					new TableCell (i.ToString(), AlignType.Right),
+					new TableCell ((debit.data [i-1]).ToString(), AlignType.Right),
+					new TableCell (credit.data [i-1].ToString(), AlignType.Right),
+					new TableCell ((debit.data [i-1] - credit.data [i-1]).ToString(), AlignType.Right)
+				};
+			}
+
+			tab2.rows[8].cells = new TableCell[4]{
+				new TableCell("", AlignType.Center),
+				new TableCell(debit.ssum.ToString(), AlignType.Right),
+				new TableCell(credit.ssum.ToString(), AlignType.Right),
+				new TableCell((debit.ssum-credit.ssum).ToString(), AlignType.Right)
+			};
+
+			Console.Write(tab2.rows[1].ToString());
 
 			tab2.WriteToFile("report.txt");
 		}
