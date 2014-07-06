@@ -10,7 +10,6 @@ namespace Statistics
 		public int max;
 		public int min;
 		public int avg;
-		public int ssum;
 
 		public FinancialArray(int days_count)
 		{
@@ -19,6 +18,7 @@ namespace Statistics
 
 		public void CalcStat()
 		{
+            int sum = data[0];
 			max = data[0];
 			min = data[0];
 			for (int i = 1; i < data.Length; i++)
@@ -31,10 +31,9 @@ namespace Statistics
 				{
 					max = data[i];
 				}
-				ssum += data[i];
+				sum += data[i];
 			}
-			avg = ssum / data.Length;
-			ssum += data [0];
+			avg = sum / data.Length;
 		}
 	}
 
@@ -110,19 +109,19 @@ namespace Statistics
 	            new TableCell("credit", AlignType.Center)
             };
 
-            tab1.rows[1].cells = new TableCell[3]{
+            tab1.rows[1].cells = new TableCell[]{
 	            new TableCell("min", AlignType.Left),
 	            new TableCell(debit.min.ToString(), AlignType.Right),
 	            new TableCell(credit.min.ToString(), AlignType.Right)
             };
 
-            tab1.rows[2].cells = new TableCell[3]{
+            tab1.rows[2].cells = new TableCell[]{
 	            new TableCell("max", AlignType.Left),
 	            new TableCell(debit.max.ToString(), AlignType.Right),
 	            new TableCell(credit.max.ToString(), AlignType.Right)
             };
 
-            tab1.rows[3].cells = new TableCell[3]{
+            tab1.rows[3].cells = new TableCell[]{
 	            new TableCell("avg", AlignType.Left),
 	            new TableCell(debit.avg.ToString(), AlignType.Right),
 	            new TableCell(credit.avg.ToString(), AlignType.Right)
@@ -136,7 +135,7 @@ namespace Statistics
 
 			TableWriter tab2 = new TableWriter();
 
-			tab2.rows = new TableRaw[9];
+            tab2.rows = new TableRaw[days_count + 2];
 			tab2.rows[0].cells = new TableCell[4]{
 				new TableCell("day", AlignType.Center),
 				new TableCell("debit", AlignType.Center),
@@ -144,23 +143,30 @@ namespace Statistics
 				new TableCell("cur balance", AlignType.Center)
 			};
 
-			for (int i = 1; i < (days_count+1); i++) {
+            int cur_debit = 0;
+            int cur_credit = 0;
+			for (int i = 0; i < days_count; i++) 
+            {
+                cur_debit += debit.data[i];
+                cur_credit += credit.data[i];
+                int cur_balance = cur_debit - cur_credit;
+                int i1 = i + 1;
 				tab2.rows [i+1].cells = new TableCell[4] {
-					new TableCell (i.ToString(), AlignType.Right),
-					new TableCell ((debit.data [i-1]).ToString(), AlignType.Right),
-					new TableCell (credit.data [i-1].ToString(), AlignType.Right),
-					new TableCell ((debit.data [i-1] - credit.data [i-1]).ToString(), AlignType.Right)
+					new TableCell (i1.ToString(), AlignType.Right),
+					new TableCell (debit.data[i].ToString(), AlignType.Right),
+					new TableCell (credit.data[i].ToString(), AlignType.Right),
+					new TableCell (cur_balance.ToString(), AlignType.Right)
 				};
 			}
 
-			tab2.rows[8].cells = new TableCell[4]{
+            tab2.rows[days_count+1].cells = new TableCell[4]{
 				new TableCell("", AlignType.Center),
-				new TableCell(debit.ssum.ToString(), AlignType.Right),
-				new TableCell(credit.ssum.ToString(), AlignType.Right),
-				new TableCell((debit.ssum-credit.ssum).ToString(), AlignType.Right)
+				new TableCell(cur_debit.ToString(), AlignType.Right),
+				new TableCell(cur_credit.ToString(), AlignType.Right),
+				new TableCell((cur_debit - cur_credit).ToString(), AlignType.Right)
 			};
 
-			Console.Write(tab2.rows[1].ToString());
+			//Console.Write(tab2.rows[1].ToString());
 
 			tab2.WriteToFile("report.txt");
 		}
