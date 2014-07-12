@@ -63,18 +63,70 @@ namespace Statistics
 	{
 		public TableRaw[] rows;
 
+
+
 		public void WriteToFile(string filename)
 		{
-			StreamWriter outFile = File.CreateText(filename);
+			StreamWriter outFile = File.CreateText (filename);
+
+			int lineLenght;
+
+			
+
+			for (int i = 0; i <= 9; i++) 
+			{	
+
+				lineLenght = 3;
+
+				if (i == 0) {
+					outFile.Write ("╔");
+					for (int s = 0; s <= lineLenght; s++) {
+						outFile.Write ("═");
+					}
+					outFile.Write ("╦");
+				}
+
+				WriteLineS (lineLenght, "=", filename);
+
+				if (i == 2) {
+					outFile.Write ("╠");
+					for (int s = 0; s <= lineLenght; s++) {
+						outFile.Write ("═");
+					}
+					outFile.Write ("╬");
+				}
 
 
 
+				outFile.Write('\n');
+			}
 
+/*
 
-			// ... implement here
+╔═════╦═══════╤════════╗
+║     ║ debit │ credit ║
+╠═════╬═══════╪════════╣
+║ min ║     5 │      5 ║
+╟─────╫───────┼────────╢
+║ max ║    34 │     32 ║
+╟─────╫───────┼────────╢
+║ avg ║  17.2 │   14.3 ║
+╚═════╩═══════╧════════╝
+*/
+
 
 			outFile.Close();
-		}        
+		}       
+
+		public void WriteLineS(int lineLength,string lineSymbol,string file_name)
+		{
+			StreamWriter lineWrite = File.CreateText (file_name);
+			for (int i = 0; i <= lineLength; i++) 
+			{
+				lineWrite.Write (lineSymbol);
+			}
+			lineWrite.Close ();
+		}
 	}
 
 	class MainClass
@@ -166,7 +218,7 @@ namespace Statistics
 				new TableCell((cur_debit - cur_credit).ToString(), AlignType.Right)
 			};
 
-			//Console.Write(tab2.rows[1].ToString());
+
 
 			tab2.WriteToFile("report.txt");
 		}
