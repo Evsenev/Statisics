@@ -18,7 +18,7 @@ namespace Statistics
 
 		public void CalcStat()
 		{
-            int sum = data[0];
+			int sum = data[0];
 			max = data[0];
 			min = data[0];
 			for (int i = 1; i < data.Length; i++)
@@ -38,94 +38,138 @@ namespace Statistics
 	}
 
 	enum AlignType { 
-        Left, 
-        Right, 
-        Center 
-    }
+		Left, 
+		Right, 
+		Center 
+	}
 
-    struct TableCell
-    {
-        string data;
-        AlignType alignType;
-        public TableCell(string theData, AlignType theAlignType)
-        {
-            data = theData;
-            alignType = theAlignType;
-        }
-    }
+	struct TableCell
+	{
+		public string data;
+		public AlignType alignType;
+		public TableCell(string theData, AlignType theAlignType)
+		{
+			data = theData;
+			alignType = theAlignType;
+		}
+	}
 
 	struct TableRaw
 	{
 		public TableCell[] cells;
 	}
 
-	class TableWriter 
-	{
-		public TableRaw[] rows;
-
-
-
-		public void WriteToFile(string filename)
-		{
-			StreamWriter outFile = File.CreateText (filename);
-
-			int lineLenght;
-
-			
-
-			for (int i = 0; i <= 9; i++) 
-			{	
-
-				lineLenght = 3;
-
-				if (i == 0) {
-					outFile.Write ("╔");
-					for (int s = 0; s <= lineLenght; s++) {
-						outFile.Write ("═");
-					}
-					outFile.Write ("╦");
-				}
-
-				WriteLineS (lineLenght, "=", filename);
-
-				if (i == 2) {
-					outFile.Write ("╠");
-					for (int s = 0; s <= lineLenght; s++) {
-						outFile.Write ("═");
-					}
-					outFile.Write ("╬");
-				}
-
-
-
-				outFile.Write('\n');
-			}
-
-/*
-
+	/*
 ╔═════╦═══════╤════════╗
 ║     ║ debit │ credit ║
 ╠═════╬═══════╪════════╣
-║ min ║     5 │      5 ║
+║ min ║	    5 │	  5    ║
 ╟─────╫───────┼────────╢
-║ max ║    34 │     32 ║
+║ max ║	   34 │	 32    ║
 ╟─────╫───────┼────────╢
 ║ avg ║  17.2 │   14.3 ║
 ╚═════╩═══════╧════════╝
 */
 
+	class TableWriter 
+	{
+		public TableRaw[] rows;
+		private StreamWriter outFile;
+
+		public void WriteToFile(string filename)
+		{
+			outFile = File.CreateText(filename);
+
+			int columns_count = rows[0].cells.Length;
+
+			int[] columns_w = new int[columns_count];
+
+			for(int c=0; c<columns_count; c++)
+			{
+				columns_w[c] = 0;
+			}
+
+			for(int r = 0; r < rows.Length; r++)
+			{
+				for(int c = 0; c < columns_count; c++)
+				{
+					int w = rows[r].cells[c].data.Length;
+					if(columns_w[c] < w)
+					{
+						columns_w[c] = w;
+					}
+				}
+			}
+
+			for(int r = 0; r < rows.Length; r++)
+			{
+				for(int c = 0; c < columns_count; c++)
+				{
+					if(r==0)
+					{
+						outFile.Write(c==0 ? "╔" : "╦");
+					}
+					else
+					{
+						outFile.Write(c==0 ? "╠" : "╬");
+					}
+					WriteDup(columns_w[c]+2, "═");
+					if(c == columns_count - 1)
+					{
+						outFile.Write(r==0 ? "╗" : "╣");
+						outFile.Write("\n");
+					}
+				}
+				for(int c = 0; c < columns_count; c++)
+				{
+					string s = rows[r].cells[c].data;
+					int left_spaces = 0, right_spaces = 0;
+
+					switch(rows[r].cells[c].alignType)
+					{
+					case AlignType.Left:
+						left_spaces = 0;
+						right_spaces = columns_w[c] - s.Length;
+						break;
+					case AlignType.Right:
+						left_spaces = columns_w[c] - s.Length;
+						right_spaces = 0;
+						break;
+					case AlignType.Center:
+						left_spaces = (columns_w[c] - s.Length) / 2;
+						right_spaces = columns_w[c] - s.Length - left_spaces;
+						break;
+					}
+					outFile.Write("║ ");
+					WriteDup(left_spaces, " ");
+					outFile.Write(s);
+					WriteDup(right_spaces, " ");
+					outFile.Write((c == (columns_count - 1)) ? " ║\n" : " ");
+				}
+				if(r == rows.Length -1)
+				{
+					for(int c = 0; c < columns_count; c++)
+					{
+						outFile.Write (c==0 ? "╚" : "╩");
+						WriteDup(columns_w[c]+2, "═");
+						if(c == columns_count - 1)
+						{
+							outFile.Write("╝\n");
+						}
+					}
+				}
+			}
 
 			outFile.Close();
-		}       
+			outFile = null;	
+		}	   
 
-		public void WriteLineS(int lineLength,string lineSymbol,string file_name)
+		public void WriteDup(int count, string s)
 		{
-			StreamWriter lineWrite = File.CreateText (file_name);
-			for (int i = 0; i <= lineLength; i++) 
+			for(int i = 0; i < count; i++) 
 			{
-				lineWrite.Write (lineSymbol);
+				outFile.Write(s);
 			}
-			lineWrite.Close ();
 		}
 	}
 
@@ -135,7 +179,6 @@ namespace Statistics
 		{
 			string myData = System.IO.File.OpenText ("raw_data.txt").ReadToEnd ().Trim ();
 
-			string numbers_1 = myData.Replace("\r\n", ";");
 			string[] numbers = myData.Replace("\r\n", ";").Split(' ', ';', '\n');
 
 			int days_count = numbers.Length / 2;
@@ -155,29 +198,29 @@ namespace Statistics
 			TableWriter tab1 = new TableWriter();
 
 			tab1.rows = new TableRaw[4];
-            tab1.rows[0].cells = new TableCell[]{
-	            new TableCell("", AlignType.Center),
-	            new TableCell("debit", AlignType.Center),
-	            new TableCell("credit", AlignType.Center)
-            };
+			tab1.rows[0].cells = new TableCell[]{
+				new TableCell("", AlignType.Center),
+				new TableCell("debit", AlignType.Center),
+				new TableCell("credit", AlignType.Center)
+			};
 
-            tab1.rows[1].cells = new TableCell[]{
-	            new TableCell("min", AlignType.Left),
-	            new TableCell(debit.min.ToString(), AlignType.Right),
-	            new TableCell(credit.min.ToString(), AlignType.Right)
-            };
+			tab1.rows[1].cells = new TableCell[]{
+				new TableCell("min", AlignType.Left),
+				new TableCell(debit.min.ToString(), AlignType.Right),
+				new TableCell(credit.min.ToString(), AlignType.Right)
+			};
 
-            tab1.rows[2].cells = new TableCell[]{
-	            new TableCell("max", AlignType.Left),
-	            new TableCell(debit.max.ToString(), AlignType.Right),
-	            new TableCell(credit.max.ToString(), AlignType.Right)
-            };
+			tab1.rows[2].cells = new TableCell[]{
+				new TableCell("max", AlignType.Left),
+				new TableCell(debit.max.ToString(), AlignType.Right),
+				new TableCell(credit.max.ToString(), AlignType.Right)
+			};
 
-            tab1.rows[3].cells = new TableCell[]{
-	            new TableCell("avg", AlignType.Left),
-	            new TableCell(debit.avg.ToString(), AlignType.Right),
-	            new TableCell(credit.avg.ToString(), AlignType.Right)
-            };
+			tab1.rows[3].cells = new TableCell[]{
+				new TableCell("avg", AlignType.Left),
+				new TableCell(debit.avg.ToString(), AlignType.Right),
+				new TableCell(credit.avg.ToString(), AlignType.Right)
+			};
 
 
 			tab1.WriteToFile("stat.txt");
@@ -187,7 +230,7 @@ namespace Statistics
 
 			TableWriter tab2 = new TableWriter();
 
-            tab2.rows = new TableRaw[days_count + 2];
+			tab2.rows = new TableRaw[days_count + 2];
 			tab2.rows[0].cells = new TableCell[4]{
 				new TableCell("day", AlignType.Center),
 				new TableCell("debit", AlignType.Center),
@@ -195,14 +238,14 @@ namespace Statistics
 				new TableCell("cur balance", AlignType.Center)
 			};
 
-            int cur_debit = 0;
-            int cur_credit = 0;
+			int cur_debit = 0;
+			int cur_credit = 0;
 			for (int i = 0; i < days_count; i++) 
-            {
-                cur_debit += debit.data[i];
-                cur_credit += credit.data[i];
-                int cur_balance = cur_debit - cur_credit;
-                int i1 = i + 1;
+			{
+				cur_debit += debit.data[i];
+				cur_credit += credit.data[i];
+				int cur_balance = cur_debit - cur_credit;
+				int i1 = i + 1;
 				tab2.rows [i+1].cells = new TableCell[4] {
 					new TableCell (i1.ToString(), AlignType.Right),
 					new TableCell (debit.data[i].ToString(), AlignType.Right),
@@ -211,7 +254,7 @@ namespace Statistics
 				};
 			}
 
-            tab2.rows[days_count+1].cells = new TableCell[4]{
+			tab2.rows[days_count+1].cells = new TableCell[4]{
 				new TableCell("", AlignType.Center),
 				new TableCell(cur_debit.ToString(), AlignType.Right),
 				new TableCell(cur_credit.ToString(), AlignType.Right),
