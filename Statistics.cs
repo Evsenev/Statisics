@@ -58,18 +58,7 @@ namespace Statistics
 	{
 		public TableCell[] cells;
 	}
-
-	/*
-╔═════╦═══════╤════════╗
-║     ║ debit │ credit ║
-╠═════╬═══════╪════════╣
-║ min ║	    5 │	  5    ║
-╟─────╫───────┼────────╢
-║ max ║	   34 │	 32    ║
-╟─────╫───────┼────────╢
-║ avg ║  17.2 │   14.3 ║
-╚═════╩═══════╧════════╝
-*/
+		
 
 	class TableWriter 
 	{
@@ -78,17 +67,22 @@ namespace Statistics
 
 		public void WriteToFile(string filename)
 		{
+			//Открываем файл
 			outFile = File.CreateText(filename);
 
-			int columns_count = rows[0].cells.Length;
+			//Указываем кол-во колонок в строке
+			int columns_count = rows[0].cells.Length;   //Почему 0  ?
 
+			//Создаем массив "Ширина колонок"
 			int[] columns_w = new int[columns_count];
 
+			//Заполняем массив Ширины - нулями, перед вычислением максимальной длины ячейки
 			for(int c=0; c<columns_count; c++)
 			{
 				columns_w[c] = 0;
 			}
 
+			//Вычисляем максимальую ширину ячейки
 			for(int r = 0; r < rows.Length; r++)
 			{
 				for(int c = 0; c < columns_count; c++)
@@ -101,8 +95,10 @@ namespace Statistics
 				}
 			}
 
+			// Чертим таблицу
 			for(int r = 0; r < rows.Length; r++)
-			{
+			{	
+				// Чертим таблицу. Верхнюю и среднюю часть (без строк с данными)
 				for(int c = 0; c < columns_count; c++)
 				{
 					if(r==0)
@@ -120,11 +116,15 @@ namespace Statistics
 						outFile.Write("\n");
 					}
 				}
+
+				// Чертим таблицу. Ячейки и данные
 				for(int c = 0; c < columns_count; c++)
 				{
+					//Присваиваем S - данные для ячейки
 					string s = rows[r].cells[c].data;
 					int left_spaces = 0, right_spaces = 0;
 
+					//Выравниивание внутри ячейки. Опираясь на Enum - AlignType
 					switch(rows[r].cells[c].alignType)
 					{
 					case AlignType.Left:
@@ -140,12 +140,14 @@ namespace Statistics
 						right_spaces = columns_w[c] - s.Length - left_spaces;
 						break;
 					}
-					outFile.Write("║ ");
-					WriteDup(left_spaces, " ");
-					outFile.Write(s);
-					WriteDup(right_spaces, " ");
-					outFile.Write((c == (columns_count - 1)) ? " ║\n" : " ");
+					outFile.Write("║ "); 											// Левая часть ячейки
+					WriteDup(left_spaces, " "); 									// Отступы слева
+					outFile.Write(s); 												// Запись данных в ячейку
+					WriteDup(right_spaces, " "); 									// Отступы справа
+					outFile.Write((c == (columns_count - 1)) ? " ║\n" : " "); 		// Правая часть ячейки
 				}
+
+				// Чертим таблицу. Нижнуюю часть.
 				if(r == rows.Length -1)
 				{
 					for(int c = 0; c < columns_count; c++)
@@ -160,10 +162,13 @@ namespace Statistics
 				}
 			}
 
+			// Закрываем файл
 			outFile.Close();
+			// Готовим объект к удалению
 			outFile = null;	
 		}	   
 
+		//Рисуем одинаковые символы. Кол-во и Символ
 		public void WriteDup(int count, string s)
 		{
 			for(int i = 0; i < count; i++) 
